@@ -33,9 +33,7 @@ class SocketServer
 
         $worker->onClose = function ($connection) use (&$users) {
 
-            if (!isset(SocketServer::$users[$connection->id])) {
-                return;
-            }
+            if (!isset(SocketServer::$users[$connection->id])) return;
 
             SocketServer::sendMessagesAll(SocketServer::$users[$connection->id]->name . ' disconnected');
 
@@ -60,7 +58,7 @@ class SocketServer
                 }
             }
 
-            if ($messageType == 'mailAll' and $messageText != '') {
+            if ($messageType == 'mailAll' && !empty($messageText)) {
                 SocketServer::sendMessagesWithout($messageText, $connection->id);
             }
         };
@@ -72,7 +70,8 @@ class SocketServer
     {
         $jsonData = '{"typeMessage": "info", "message": "' . $message . '"}';
 
-        foreach (SocketServer::$users as $user) {
+        foreach (SocketServer::$users as $user)
+        {
             $user->connection->send($jsonData);
 
             echo 'Message sent to ' . $user->connection->id;
@@ -81,12 +80,15 @@ class SocketServer
 
     static function sendMessagesWithout($message, $id)
     {
-        $jsonData = '{"typeMessage": "mailAll", "name": "' . SocketServer::$users[$id]->name . '", "message": "' . $message . '"}';
+        $jsonData = json_encode( [
+            'typeMessage' => 'mailAll',
+            'name'        =>  SocketServer::$users[$id]->name,
+            'message'     => $message
+        ] );
 
-        foreach (SocketServer::$users as $user) {
-            if ($user->connection->id != $id) {
-                $user->connection->send($jsonData);
-            }
+        foreach (SocketServer::$users as $user)
+        {
+            ($user->connection->id != $id) && $user->connection->send($jsonData);
         }
     }
 }

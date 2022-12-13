@@ -1,6 +1,5 @@
 socket_url = "ws://127.0.0.1:27800/";
 
-
 class TextValidator {
     static escapeHtml(text) {
         let map = {
@@ -16,7 +15,6 @@ class TextValidator {
         });
     }
 }
-
 
 class SocketClient {
 
@@ -46,9 +44,8 @@ class SocketClient {
                 }
             }
 
-            SocketClient.connectionTimer = setTimeout(tick, 2000); // (*)
+            SocketClient.connectionTimer = setTimeout(tick, 2000);
         }, 2000);
-
     }
 
     static initWs() {
@@ -62,8 +59,8 @@ class SocketClient {
 
         this.ws.onopen = function (e) {
             SocketClient.connectionTimer = null;
-
             SocketClient.wasDisconnected = false;
+
             SocketClient.SendMessageToServer('', 'register');
 
             Painter.InsertOtherMessage('Connected successfully');
@@ -84,7 +81,7 @@ class SocketClient {
 
     static init(userName, url) {
         this.userName = userName;
-        this.url = url;
+        this.url      = url;
 
         this.initWs();
 
@@ -105,11 +102,9 @@ class Painter {
         let newP = document.createElement('p')
         newP.className = obj['typeMessage'];
 
-        if (obj['name'] != undefined) {
-            newP.innerHTML = '<b>' + obj['name'] + ': </b>' + obj['message'];
-        } else {
-            newP.innerHTML = '<b>' + obj['message'] + '</b>';
-        }
+        newP.innerHTML = (obj['name'] != undefined)
+            ? '<b>' + obj['name'] + ': </b>' + obj['message']
+            : '<b>' + obj['message'] + '</b>';
 
         document.body.append(newP);
     }
@@ -118,6 +113,7 @@ class Painter {
         let newP = document.createElement('p')
         newP.className = 'send';
         newP.innerHTML = '<b>' + message + '</b>';
+
         document.body.append(newP);
     }
 
@@ -125,6 +121,7 @@ class Painter {
         let newP = document.createElement('p')
         newP.className = 'send';
         newP.innerHTML = '<b>Вы</b>: ' + message;
+
         document.body.append(newP);
     }
 
@@ -157,7 +154,6 @@ let buttonName = document.getElementById('button_name');
 let inputName = document.getElementById('input_name');
 
 buttonName.onclick = function () {
-
     let form = document.getElementById('prompt-form-container');
     let username = TextValidator.escapeHtml(inputName.value);
 
@@ -166,7 +162,3 @@ buttonName.onclick = function () {
         SocketClient.init(username, socket_url);
     }
 }
-
-
-
-
