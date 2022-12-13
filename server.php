@@ -17,17 +17,15 @@ class User
 
 class SocketServer
 {
-    static private $users = [];
+    static private array $users = [];
 
-    static function init($url)
+    static function init(string $url)
     {
         $worker = new Worker($url);
 
         $worker->onConnect = function ($connection) use (&$users) {
             $connection->onWebSocketConnect = function ($connection) use (&$users) {
                 SocketServer::$users[$connection->id] = new User($connection);
-
-                echo 'New connection: ' . $connection->id . PHP_EOL;
             };
         };
 
@@ -41,13 +39,11 @@ class SocketServer
         };
 
         $worker->onMessage = function ($connection, $message) use (&$users) {
-            echo 'New message: ' . $message . PHP_EOL;
-
             $jsonData = json_decode($message, true);
 
-            $messageType = isset($jsonData['messageType']) ? $jsonData['messageType'] : '';
-            $name = isset($jsonData['name']) ? $jsonData['name'] : '';
-            $messageText = isset($jsonData['message']) ? $jsonData['message'] : '';
+            $name        = $jsonData['name'] ?? '';
+            $messageType = $jsonData['messageType'] ?? '';
+            $messageText = $jsonData['message'] ?? '';
 
             if ($messageType == 'register') {
                 foreach (SocketServer::$users as $user) {
@@ -59,14 +55,14 @@ class SocketServer
             }
 
             if ($messageType == 'mailAll' && !empty($messageText)) {
-                SocketServer::sendMessagesWithout($messageText, $connection->id);
+                SocketServer::sendMessageFrom($messageText, $connection->id);
             }
         };
 
         Worker::runAll();
     }
 
-    static function sendMessagesAll($message)
+    static function sendMessagesAll(string $message)
     {
         $jsonData = json_encode([
             'typeMessage' => 'mailAll',
@@ -76,12 +72,10 @@ class SocketServer
         foreach (SocketServer::$users as $user)
         {
             $user->connection->send($jsonData);
-
-            echo 'Message sent to ' . $user->connection->id;
         }
     }
 
-    static function sendMessagesWithout($message, $id)
+    static function sendMessageFrom(string $message, int $id)
     {
         $jsonData = json_encode([
             'typeMessage' => 'mailAll',
