@@ -80,11 +80,11 @@ class SocketServer
 
     static function sendMessagesWithout($message, $id)
     {
-        $jsonData = json_encode( [
+        $jsonData = json_encode([
             'typeMessage' => 'mailAll',
             'name'        =>  SocketServer::$users[$id]->name,
             'message'     => $message
-        ] );
+        ]);
 
         foreach (SocketServer::$users as $user)
         {
