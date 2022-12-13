@@ -68,7 +68,10 @@ class SocketServer
 
     static function sendMessagesAll($message)
     {
-        $jsonData = '{"typeMessage": "info", "message": "' . $message . '"}';
+        $jsonData = json_encode([
+            'typeMessage' => 'mailAll',
+            'message'     => $message
+        ]);
 
         foreach (SocketServer::$users as $user)
         {
@@ -82,7 +85,7 @@ class SocketServer
     {
         $jsonData = json_encode([
             'typeMessage' => 'mailAll',
-            'name'        =>  SocketServer::$users[$id]->name,
+            'name'        => SocketServer::$users[$id]->name,
             'message'     => $message
         ]);
 
